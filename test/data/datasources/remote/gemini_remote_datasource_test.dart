@@ -178,4 +178,38 @@ void main() {
 
     expect(callDataSource, throwsA(isA<NetworkException>()));
   });
+
+  test('retries a temporary 503 response and returns the next response',
+      () async {
+    int requests = 0;
+    when(
+      () => dio.post<Map<String, dynamic>>(
+        ApiConstants.geminiGenerateContentPath,
+        queryParameters: any(named: 'queryParameters'),
+        data: any(named: 'data'),
+      ),
+    ).thenAnswer((_) async {
+      requests++;
+      if (requests == 1) {
+        throw DioException(
+          requestOptions:
+              RequestOptions(path: ApiConstants.geminiGenerateContentPath),
+          type: DioExceptionType.badResponse,
+          response: Response<Map<String, dynamic>>(
+            requestOptions:
+                RequestOptions(path: ApiConstants.geminiGenerateContentPath),
+            statusCode: 503,
+          ),
+        );
+      }
+      return _response(
+        _envelope(jsonEncode(<String, dynamic>{'outcome': 'interview'})),
+      );
+    });
+
+    final DataMap result = await callDataSource();
+
+    expect(result['outcome'], 'interview');
+    expect(requests, 2);
+  });
 }

@@ -50,22 +50,22 @@ $jobDescription''';
   }
 
   static const DataMap jobPostingResponseSchema = <String, dynamic>{
-    'type': 'OBJECT',
+    'type': 'object',
     'properties': <String, dynamic>{
-      'company': <String, dynamic>{'type': 'STRING'},
-      'email': <String, dynamic>{'type': 'STRING'},
-      'role': <String, dynamic>{'type': 'STRING'},
-      'location': <String, dynamic>{'type': 'STRING'},
-      'experience': <String, dynamic>{'type': 'STRING'},
+      'company': <String, dynamic>{'type': 'string'},
+      'email': <String, dynamic>{'type': 'string'},
+      'role': <String, dynamic>{'type': 'string'},
+      'location': <String, dynamic>{'type': 'string'},
+      'experience': <String, dynamic>{'type': 'string'},
       'skills': <String, dynamic>{
-        'type': 'ARRAY',
-        'items': <String, dynamic>{'type': 'STRING'},
+        'type': 'array',
+        'items': <String, dynamic>{'type': 'string'},
       },
-      'subject': <String, dynamic>{'type': 'STRING'},
-      'emailBody': <String, dynamic>{'type': 'STRING'},
-      'matchScore': <String, dynamic>{'type': 'INTEGER'},
-      'shouldApply': <String, dynamic>{'type': 'BOOLEAN'},
-      'matchSummary': <String, dynamic>{'type': 'STRING'},
+      'subject': <String, dynamic>{'type': 'string'},
+      'emailBody': <String, dynamic>{'type': 'string'},
+      'matchScore': <String, dynamic>{'type': 'integer'},
+      'shouldApply': <String, dynamic>{'type': 'boolean'},
+      'matchSummary': <String, dynamic>{'type': 'string'},
     },
     'required': <String>[
       'company',
@@ -80,19 +80,7 @@ $jobDescription''';
       'shouldApply',
       'matchSummary',
     ],
-    'propertyOrdering': <String>[
-      'company',
-      'email',
-      'role',
-      'location',
-      'experience',
-      'skills',
-      'subject',
-      'emailBody',
-      'matchScore',
-      'shouldApply',
-      'matchSummary',
-    ],
+    'additionalProperties': false,
   };
 
   // ── Reply classification (reply tracking) ─────────────────────────────
@@ -109,13 +97,14 @@ Respond ONLY with JSON conforming to the provided schema.''';
   }
 
   static const DataMap replyResponseSchema = <String, dynamic>{
-    'type': 'OBJECT',
+    'type': 'object',
     'properties': <String, dynamic>{
       'outcome': <String, dynamic>{
-        'type': 'STRING',
+        'type': 'string',
         'enum': <String>['interview', 'selected', 'rejected', 'none'],
       },
     },
     'required': <String>['outcome'],
+    'additionalProperties': false,
   };
 }

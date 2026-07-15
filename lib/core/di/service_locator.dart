@@ -7,7 +7,7 @@ import 'package:flutter_apply_ai/data/datasources/local/app_database.dart';
 import 'package:flutter_apply_ai/data/datasources/local/application_local_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/local/secure_storage_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/local/settings_local_datasource.dart';
-import 'package:flutter_apply_ai/data/datasources/remote/gemini_remote_datasource.dart';
+import 'package:flutter_apply_ai/data/datasources/remote/openai_remote_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/remote/gmail_auth_service.dart';
 import 'package:flutter_apply_ai/data/datasources/remote/gmail_remote_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/remote/gmail_token_store.dart';
@@ -116,14 +116,14 @@ abstract final class ServiceLocator {
     final DioClient dioClient = DioClient(logger: logger);
     Get.put<DioClient>(dioClient, permanent: true);
 
-    final Dio geminiDio = dioClient.create(baseUrl: ApiConstants.geminiBaseUrl);
-    Get.put<GeminiRemoteDataSource>(
-      GeminiRemoteDataSourceImpl(dio: geminiDio, logger: logger),
+    final Dio openAiDio = dioClient.create(baseUrl: ApiConstants.openAiBaseUrl);
+    Get.put<OpenAiRemoteDataSource>(
+      OpenAiRemoteDataSourceImpl(dio: openAiDio, logger: logger),
       permanent: true,
     );
     Get.put<AiRepository>(
       AiRepositoryImpl(
-        remoteDataSource: Get.find<GeminiRemoteDataSource>(),
+        remoteDataSource: Get.find<OpenAiRemoteDataSource>(),
         settingsRepository: Get.find<SettingsRepository>(),
         logger: logger,
       ),

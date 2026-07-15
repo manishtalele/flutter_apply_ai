@@ -74,7 +74,7 @@ class HomeController extends GetxController {
 
   /// Human-readable list of the setup steps still outstanding.
   List<String> get missingSetupItems => <String>[
-        if (needsApiKey) 'Gemini API key',
+        if (needsApiKey) 'OpenAI API key',
         if (needsGmail) 'Gmail connection',
         if (needsResume) 'a resume',
       ];

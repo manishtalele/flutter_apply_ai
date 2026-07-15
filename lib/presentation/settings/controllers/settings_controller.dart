@@ -150,7 +150,7 @@ class SettingsController extends GetxController {
 
     if (result.isRight()) {
       settings.value = settings.value.copyWith(geminiApiKey: key);
-      _notify('Saved', 'Gemini API key saved securely.');
+      _notify('Saved', 'OpenAI API key saved securely.');
     } else {
       _notify('Error', _messageOf(result));
     }

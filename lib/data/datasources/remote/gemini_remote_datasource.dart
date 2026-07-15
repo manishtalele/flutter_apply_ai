@@ -44,32 +44,12 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
     }
 
     try {
-      final Response<Map<String, dynamic>> response =
-          await _dio.post<Map<String, dynamic>>(
-        ApiConstants.geminiGenerateContentPath,
-        queryParameters: <String, dynamic>{
-          ApiConstants.apiKeyQueryParam: apiKey,
-        },
-        data: <String, dynamic>{
-          'systemInstruction': <String, dynamic>{
-            'parts': <DataMap>[
-              <String, dynamic>{'text': systemInstruction},
-            ],
-          },
-          'contents': <DataMap>[
-            <String, dynamic>{
-              'role': 'user',
-              'parts': <DataMap>[
-                <String, dynamic>{'text': userContent},
-              ],
-            },
-          ],
-          'generationConfig': <String, dynamic>{
-            'responseMimeType': 'application/json',
-            'responseSchema': responseSchema,
-            'temperature': temperature,
-          },
-        },
+      final Response<Map<String, dynamic>> response = await _postWithRetry(
+        apiKey: apiKey,
+        systemInstruction: systemInstruction,
+        userContent: userContent,
+        responseSchema: responseSchema,
+        temperature: temperature,
       );
 
       final Map<String, dynamic>? body = response.data;
@@ -89,6 +69,80 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
       _logger.e('Failed to decode Gemini JSON', error, stackTrace);
       throw AiException('Failed to parse the AI response.', error);
     }
+  }
+
+  /// Retries temporary service and connectivity failures. Gemini can return a
+  /// 503 during demand spikes; those failures are safe to retry because this
+  /// endpoint only generates a response and has no side effects.
+  Future<Response<Map<String, dynamic>>> _postWithRetry({
+    required String apiKey,
+    required String systemInstruction,
+    required String userContent,
+    required DataMap responseSchema,
+    required double temperature,
+  }) async {
+    const int maxAttempts = 3;
+
+    for (int attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        return await _dio.post<Map<String, dynamic>>(
+          ApiConstants.geminiGenerateContentPath,
+          queryParameters: <String, dynamic>{
+            ApiConstants.apiKeyQueryParam: apiKey,
+          },
+          data: <String, dynamic>{
+            'systemInstruction': <String, dynamic>{
+              'parts': <DataMap>[
+                <String, dynamic>{'text': systemInstruction},
+              ],
+            },
+            'contents': <DataMap>[
+              <String, dynamic>{
+                'role': 'user',
+                'parts': <DataMap>[
+                  <String, dynamic>{'text': userContent},
+                ],
+              },
+            ],
+            'generationConfig': <String, dynamic>{
+              'responseMimeType': 'application/json',
+              'responseSchema': responseSchema,
+              'temperature': temperature,
+            },
+          },
+        );
+      } on DioException catch (error) {
+        if (!_isRetryable(error) || attempt == maxAttempts - 1) {
+          rethrow;
+        }
+
+        final Duration delay = Duration(seconds: 1 << attempt);
+        _logger.w(
+          'Gemini request failed temporarily; retrying in '
+          '${delay.inSeconds}s (attempt ${attempt + 2}/$maxAttempts).',
+          error,
+        );
+        await Future<void>.delayed(delay);
+      }
+    }
+
+    throw StateError('Gemini retry loop completed without a response.');
+  }
+
+  bool _isRetryable(DioException error) {
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.connectionError) {
+      return true;
+    }
+
+    final int? statusCode = error.response?.statusCode;
+    return statusCode == 429 ||
+        statusCode == 500 ||
+        statusCode == 502 ||
+        statusCode == 503 ||
+        statusCode == 504;
   }
 
   /// Navigates the Gemini response envelope to the generated text part,

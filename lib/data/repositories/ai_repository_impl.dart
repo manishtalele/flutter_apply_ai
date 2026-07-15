@@ -2,7 +2,7 @@ import 'package:flutter_apply_ai/core/constants/prompt_constants.dart';
 import 'package:flutter_apply_ai/core/errors/exceptions.dart';
 import 'package:flutter_apply_ai/core/utils/app_logger.dart';
 import 'package:flutter_apply_ai/core/utils/typedefs.dart';
-import 'package:flutter_apply_ai/data/datasources/remote/gemini_remote_datasource.dart';
+import 'package:flutter_apply_ai/data/datasources/remote/openai_remote_datasource.dart';
 import 'package:flutter_apply_ai/data/models/job_posting_model.dart';
 import 'package:flutter_apply_ai/data/repositories/repository_error_mapper.dart';
 import 'package:flutter_apply_ai/domain/entities/enums/reply_outcome.dart';
@@ -10,19 +10,19 @@ import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
 import 'package:flutter_apply_ai/domain/repositories/ai_repository.dart';
 import 'package:flutter_apply_ai/domain/repositories/settings_repository.dart';
 
-/// [AiRepository] backed by Gemini. Composes the prompt/schema, retrieves the
+/// [AiRepository] backed by OpenAI. Composes the prompt/schema, retrieves the
 /// API key from [SettingsRepository], and maps the structured JSON response
 /// into domain entities. All errors funnel through [RepositoryErrorMapper].
 class AiRepositoryImpl with RepositoryErrorMapper implements AiRepository {
   AiRepositoryImpl({
-    required GeminiRemoteDataSource remoteDataSource,
+    required OpenAiRemoteDataSource remoteDataSource,
     required SettingsRepository settingsRepository,
     required AppLogger logger,
   })  : _remote = remoteDataSource,
         _settings = settingsRepository,
         _logger = logger;
 
-  final GeminiRemoteDataSource _remote;
+  final OpenAiRemoteDataSource _remote;
   final SettingsRepository _settings;
   final AppLogger _logger;
 
@@ -74,18 +74,18 @@ class AiRepositoryImpl with RepositoryErrorMapper implements AiRepository {
     });
   }
 
-  /// Loads the Gemini API key, throwing an [AiException] (mapped to
+  /// Loads the OpenAI API key, throwing an [AiException] (mapped to
   /// [AiFailure]) if it is missing so the UI can prompt the user to set it.
   Future<String> _requireApiKey() async {
     final Result<String> result = await _settings.getGeminiApiKey();
     return result.fold(
       (_) => throw const AiException(
-        'Unable to read the Gemini API key.',
+        'Unable to read the OpenAI API key.',
       ),
       (String key) {
         if (key.trim().isEmpty) {
           throw const AiException(
-            'Gemini API key is not configured. Add it in Settings.',
+            'OpenAI API key is not configured. Add it in Settings.',
           );
         }
         return key.trim();

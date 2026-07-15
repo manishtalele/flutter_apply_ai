@@ -79,7 +79,11 @@ class _RailHeader extends StatelessWidget {
         children: <Widget>[
           Icon(Icons.auto_awesome_rounded, color: theme.colorScheme.primary),
           const SizedBox(width: AppDimensions.spaceSm),
-          Expanded(
+          SizedBox(
+            width: AppDimensions.navRailWidth -
+                (AppDimensions.spaceMd * 2) -
+                24 -
+                AppDimensions.spaceSm,
             child: Text(
               AppConstants.appName,
               style: theme.textTheme.titleSmall,

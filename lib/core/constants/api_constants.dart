@@ -7,12 +7,9 @@ abstract final class ApiConstants {
   const ApiConstants._();
 
   // ── Gemini (Generative Language API) ─────────────────────────────────
-  static const String geminiBaseUrl =
-      'https://generativelanguage.googleapis.com';
-  static const String geminiModel = 'gemini-2.5-flash';
-  static const String geminiGenerateContentPath =
-      '/v1beta/models/$geminiModel:generateContent';
-  static const String apiKeyQueryParam = 'key';
+  static const String openAiBaseUrl = 'https://api.openai.com';
+  static const String openAiModel = 'gpt-5.6';
+  static const String openAiResponsesPath = '/v1/responses';
 
   // ── Gmail REST API ───────────────────────────────────────────────────
   static const String gmailBaseUrl = 'https://gmail.googleapis.com';

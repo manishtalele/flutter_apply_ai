@@ -9,8 +9,9 @@ class SplashBinding extends Bindings {
 
   @override
   void dependencies() {
-    Get.lazyPut<SplashController>(
-      () => SplashController(Get.find<AppLogger>()),
-    );
+    // The splash view only displays static UI and never reads `controller`.
+    // A lazy registration would therefore never instantiate the controller,
+    // so its `onReady` bootstrap (and the route transition) would not run.
+    Get.put<SplashController>(SplashController(Get.find<AppLogger>()));
   }
 }

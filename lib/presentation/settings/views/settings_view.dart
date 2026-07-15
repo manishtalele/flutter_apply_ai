@@ -32,7 +32,7 @@ class SettingsView extends GetView<SettingsController> {
                 constraints: const BoxConstraints(maxWidth: 780),
                 child: ListView(
                   children: <Widget>[
-                    _GeminiSection(controller: controller),
+                    _OpenAiSection(controller: controller),
                     const SizedBox(height: AppDimensions.spaceMd),
                     _SenderSection(controller: controller),
                     const SizedBox(height: AppDimensions.spaceMd),
@@ -53,15 +53,15 @@ class SettingsView extends GetView<SettingsController> {
   }
 }
 
-class _GeminiSection extends StatelessWidget {
-  const _GeminiSection({required this.controller});
+class _OpenAiSection extends StatelessWidget {
+  const _OpenAiSection({required this.controller});
 
   final SettingsController controller;
 
   @override
   Widget build(BuildContext context) {
     return SettingsSection(
-      title: 'Gemini API Key',
+      title: 'OpenAI API Key',
       icon: Icons.key_rounded,
       subtitle: 'Used to analyze job posts and generate emails. Stored securely.',
       child: Column(
@@ -71,7 +71,7 @@ class _GeminiSection extends StatelessWidget {
               controller: controller.apiKeyController,
               obscureText: controller.obscureApiKey.value,
               decoration: InputDecoration(
-                hintText: 'Paste your Gemini API key',
+                hintText: 'Paste your OpenAI API key',
                 suffixIcon: IconButton(
                   icon: Icon(
                     controller.obscureApiKey.value
