@@ -21,6 +21,9 @@ Rules:
   return an empty string (or empty array for skills) — never invent data.
 - "email" must be the application/recipient email address found in the post. If
   no email is present, return an empty string.
+- "phone" must be the contact/WhatsApp phone number found in the post, kept in
+  its original form including the country code if present (e.g. "+91 9655573339").
+  Return an empty string if no phone number is present.
 - "subject" must be a concise, professional email subject line for applying to
   this role.
 - "emailBody" must be a professional, personalized application email in valid
@@ -56,6 +59,7 @@ $jobDescription''';
     'properties': <String, dynamic>{
       'company': <String, dynamic>{'type': 'string'},
       'email': <String, dynamic>{'type': 'string'},
+      'phone': <String, dynamic>{'type': 'string'},
       'role': <String, dynamic>{'type': 'string'},
       'location': <String, dynamic>{'type': 'string'},
       'experience': <String, dynamic>{'type': 'string'},
@@ -72,6 +76,7 @@ $jobDescription''';
     'required': <String>[
       'company',
       'email',
+      'phone',
       'role',
       'location',
       'experience',

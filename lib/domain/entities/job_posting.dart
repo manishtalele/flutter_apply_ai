@@ -19,6 +19,7 @@ class JobPosting extends Equatable {
     required this.matchScore,
     required this.shouldApply,
     this.matchSummary = '',
+    this.phone = '',
   });
 
   final String company;
@@ -29,6 +30,9 @@ class JobPosting extends Equatable {
   final List<String> skills;
   final String subject;
   final String emailBody;
+
+  /// Contact / WhatsApp phone number extracted from the post ('' if none).
+  final String phone;
 
   /// AI-computed fit score, 0–100.
   final int matchScore;
@@ -41,6 +45,9 @@ class JobPosting extends Equatable {
 
   /// Whether a recipient email address was extracted.
   bool get hasRecipient => email.trim().isNotEmpty;
+
+  /// Whether a contact phone number was extracted.
+  bool get hasPhone => phone.trim().isNotEmpty;
 
   /// Whether the posting has the minimum data required to send an application.
   bool get isSendable =>
@@ -58,6 +65,7 @@ class JobPosting extends Equatable {
     int? matchScore,
     bool? shouldApply,
     String? matchSummary,
+    String? phone,
   }) {
     return JobPosting(
       company: company ?? this.company,
@@ -71,6 +79,7 @@ class JobPosting extends Equatable {
       matchScore: matchScore ?? this.matchScore,
       shouldApply: shouldApply ?? this.shouldApply,
       matchSummary: matchSummary ?? this.matchSummary,
+      phone: phone ?? this.phone,
     );
   }
 
@@ -87,5 +96,6 @@ class JobPosting extends Equatable {
         matchScore,
         shouldApply,
         matchSummary,
+        phone,
       ];
 }

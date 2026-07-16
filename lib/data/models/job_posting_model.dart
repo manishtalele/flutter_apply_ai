@@ -17,6 +17,7 @@ class JobPostingModel extends JobPosting {
     required super.matchScore,
     required super.shouldApply,
     super.matchSummary,
+    super.phone,
   });
 
   factory JobPostingModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +33,7 @@ class JobPostingModel extends JobPosting {
       matchScore: _asScore(json['matchScore']),
       shouldApply: _asBool(json['shouldApply']),
       matchSummary: _asString(json['matchSummary']),
+      phone: _asString(json['phone']),
     );
   }
 
@@ -48,6 +50,7 @@ class JobPostingModel extends JobPosting {
       matchScore: entity.matchScore,
       shouldApply: entity.shouldApply,
       matchSummary: entity.matchSummary,
+      phone: entity.phone,
     );
   }
 
@@ -64,6 +67,7 @@ class JobPostingModel extends JobPosting {
       'matchScore': matchScore,
       'shouldApply': shouldApply,
       'matchSummary': matchSummary,
+      'phone': phone,
     };
   }
 

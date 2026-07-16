@@ -149,6 +149,12 @@ class _ResultContent extends StatelessWidget {
                   emptyPlaceholder: 'No email found in the post',
                 ),
                 PreviewField(
+                  icon: Icons.chat_outlined,
+                  label: 'Phone / WhatsApp',
+                  value: posting.phone,
+                  emptyPlaceholder: 'No phone number found',
+                ),
+                PreviewField(
                   icon: Icons.place_outlined,
                   label: 'Location',
                   value: posting.location,
@@ -261,6 +267,31 @@ class _ApplyActions extends StatelessWidget {
               ),
             ],
           ),
+          if (controller.posting.value?.hasPhone ?? false) ...<Widget>[
+            const SizedBox(height: AppDimensions.spaceSm),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => unawaited(controller.openWhatsApp()),
+                icon: const Icon(Icons.chat_rounded, size: 18),
+                label: const Text('Message on WhatsApp'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF25D366),
+                  foregroundColor: const Color(0xFFFFFFFF),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: AppDimensions.spaceXxs),
+              child: Text(
+                'Opens WhatsApp with a ready message — attach your resume there '
+                'and send.',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
         ],
       );
     });

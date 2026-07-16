@@ -20,6 +20,7 @@ import 'package:flutter_apply_ai/domain/usecases/usecase.dart';
 import 'package:flutter_apply_ai/presentation/history/controllers/history_controller.dart';
 import 'package:flutter_apply_ai/presentation/shell/controllers/shell_controller.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// ViewModel for the Home screen: paste → AI analyze → preview → apply.
 ///
@@ -149,6 +150,62 @@ class HomeController extends GetxController {
   }
 
   void removeAttachment(String path) => extraAttachments.remove(path);
+
+  /// Opens WhatsApp on the post's phone number with a personalized message
+  /// pre-filled. WhatsApp does not allow apps to auto-attach files, so the
+  /// resume must be attached manually in the WhatsApp window before sending.
+  Future<void> openWhatsApp() async {
+    final JobPosting? current = posting.value;
+    if (current == null) {
+      return;
+    }
+    final String number = _normalizePhone(current.phone);
+    if (number.isEmpty) {
+      _notify('No number', 'No phone number was detected in this post.');
+      return;
+    }
+    final String message = _whatsAppMessage(current);
+    final Uri uri = Uri.parse(
+      'https://wa.me/$number?text=${Uri.encodeComponent(message)}',
+    );
+    final bool launched =
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched) {
+      _notify('Could not open', 'Unable to open WhatsApp for this number.');
+    }
+  }
+
+  /// Reduces a raw phone string to digits and applies an India default country
+  /// code when a bare 10-digit number is provided.
+  String _normalizePhone(String raw) {
+    final String digits =
+        raw.split('').where((String c) => '0123456789'.contains(c)).join();
+    if (digits.length == 10) {
+      return '91$digits';
+    }
+    if (digits.length == 11 && digits.startsWith('0')) {
+      return '91${digits.substring(1)}';
+    }
+    return digits;
+  }
+
+  String _whatsAppMessage(JobPosting posting) {
+    final String name = settings.value.senderName.trim();
+    final String role = posting.role.trim();
+    final String company = posting.company.trim();
+    final StringBuffer buffer = StringBuffer('Hi');
+    if (company.isNotEmpty) {
+      buffer.write(' $company team');
+    }
+    buffer.write(',\n\nI came across the ');
+    buffer.write(role.isEmpty ? 'job opening' : '$role opening');
+    buffer.write(" and I'm very interested in applying.");
+    if (name.isNotEmpty) {
+      buffer.write(' My name is $name.');
+    }
+    buffer.write(' I\'m sharing my resume here for your consideration.');
+    return buffer.toString();
+  }
 
   String get _candidateProfile {
     final String summary = settings.value.profileSummary.trim();

@@ -10,6 +10,7 @@ void main() {
       final JobPostingModel model = JobPostingModel.fromJson(const <String, dynamic>{
         'company': 'Acme Corp',
         'email': 'jobs@acme.com',
+        'phone': '+91 9655573339',
         'role': 'Flutter Developer',
         'location': 'Remote',
         'experience': '3+ years',
@@ -22,6 +23,8 @@ void main() {
       });
 
       expect(model.company, 'Acme Corp');
+      expect(model.phone, '+91 9655573339');
+      expect(model.hasPhone, isTrue);
       expect(model.skills, const <String>['Flutter', 'Dart', 'GetX']);
       expect(model.matchScore, 87);
       expect(model.shouldApply, isTrue);
