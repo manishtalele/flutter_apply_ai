@@ -26,7 +26,9 @@ Rules:
 - "emailBody" must be a professional, personalized application email in valid
   HTML (use <p> paragraphs; no <html>/<body> wrapper). Reference the role and 1–2
   relevant skills. Keep it under 180 words. Do not fabricate the candidate's
-  experience beyond what the provided candidate profile states.
+  experience beyond what the provided candidate profile states. Do NOT add a
+  sign-off or signature (no "Best regards, <name>", no contact details) — a
+  signature block is appended automatically after your text.
 - "matchScore" is an integer 0–100 measuring how well the candidate profile fits
   the role's required skills, experience, and location. If no candidate profile
   is provided, base the score on general seniority/skill alignment cues.

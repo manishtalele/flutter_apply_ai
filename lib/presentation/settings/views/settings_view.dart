@@ -9,6 +9,7 @@ import 'package:flutter_apply_ai/domain/entities/resume_profile.dart';
 import 'package:flutter_apply_ai/presentation/settings/controllers/settings_controller.dart';
 import 'package:flutter_apply_ai/presentation/settings/widgets/add_resume_dialog.dart';
 import 'package:flutter_apply_ai/presentation/settings/widgets/settings_section.dart';
+import 'package:flutter_apply_ai/presentation/settings/widgets/signature_preview.dart';
 import 'package:flutter_apply_ai/presentation/shared/widgets/app_button.dart';
 import 'package:get/get.dart';
 
@@ -143,6 +144,27 @@ class _SenderSection extends StatelessWidget {
                   'based in Bengaluru; open to remote.',
               alignLabelWithHint: true,
             ),
+          ),
+          const SizedBox(height: AppDimensions.spaceMd),
+          TextField(
+            controller: controller.signatureController,
+            maxLines: 6,
+            decoration: const InputDecoration(
+              labelText: 'Email signature',
+              hintText: 'Appended to every application email, e.g.\n'
+                  'Best regards,\n'
+                  'Manish Talele\n'
+                  'Flutter Developer\n'
+                  '+91 9867243616 · manishtalele1410@gmail.com\n'
+                  'https://github.com/manishtalele',
+              alignLabelWithHint: true,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spaceMd),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller.signatureController,
+            builder: (BuildContext context, TextEditingValue value, _) =>
+                SignaturePreview(signature: value.text),
           ),
           const SizedBox(height: AppDimensions.spaceMd),
           Align(

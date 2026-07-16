@@ -16,6 +16,7 @@ class AppSettingsModel extends AppSettings {
     super.gmailAccountEmail,
     super.senderName,
     super.profileSummary,
+    super.emailSignature,
   });
 
   factory AppSettingsModel.fromEntity(AppSettings entity) {
@@ -26,6 +27,7 @@ class AppSettingsModel extends AppSettings {
       gmailAccountEmail: entity.gmailAccountEmail,
       senderName: entity.senderName,
       profileSummary: entity.profileSummary,
+      emailSignature: entity.emailSignature,
     );
   }
 
@@ -44,6 +46,7 @@ class AppSettingsModel extends AppSettings {
       gmailAccountEmail: json['gmailAccountEmail'] as String?,
       senderName: (json['senderName'] as String?) ?? '',
       profileSummary: (json['profileSummary'] as String?) ?? '',
+      emailSignature: (json['emailSignature'] as String?) ?? '',
     );
   }
 
@@ -55,6 +58,7 @@ class AppSettingsModel extends AppSettings {
       'gmailAccountEmail': gmailAccountEmail,
       'senderName': senderName,
       'profileSummary': profileSummary,
+      'emailSignature': emailSignature,
     };
   }
 }

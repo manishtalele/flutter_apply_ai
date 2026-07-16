@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_apply_ai/core/enums/view_state.dart';
 import 'package:flutter_apply_ai/core/errors/failures.dart';
 import 'package:flutter_apply_ai/core/utils/app_logger.dart';
+import 'package:flutter_apply_ai/core/utils/signature_formatter.dart';
 import 'package:flutter_apply_ai/domain/entities/app_settings.dart';
 import 'package:flutter_apply_ai/domain/entities/application.dart';
 import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
@@ -119,6 +120,16 @@ class HomeController extends GetxController {
 
   void selectResume(ResumeProfile? resume) => selectedResume.value = resume;
 
+  /// Appends the user's saved signature (as HTML) to the AI-generated email
+  /// body. No-op when the signature is empty.
+  String _appendSignature(String body) {
+    final String html = SignatureFormatter.toHtml(settings.value.emailSignature);
+    if (html.isEmpty) {
+      return body;
+    }
+    return '$body<br><br>$html';
+  }
+
   /// Opens the file picker to attach one or more additional files (beyond the
   /// resume), de-duplicating by path.
   Future<void> addAttachments() async {
@@ -177,7 +188,9 @@ class HomeController extends GetxController {
         _notify('Analysis failed', failure.message);
       },
       (JobPosting analyzed) {
-        posting.value = analyzed;
+        posting.value = analyzed.copyWith(
+          emailBody: _appendSignature(analyzed.emailBody),
+        );
         state.value = ViewState.success;
         _logger.i('Job analyzed: ${analyzed.company} / ${analyzed.role}');
       },

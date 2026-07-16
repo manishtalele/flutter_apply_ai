@@ -70,6 +70,7 @@ class SettingsController extends GetxController {
   final TextEditingController apiKeyController = TextEditingController();
   final TextEditingController senderNameController = TextEditingController();
   final TextEditingController profileController = TextEditingController();
+  final TextEditingController signatureController = TextEditingController();
 
   final Rx<ViewState> loadState = ViewState.initial.obs;
   final Rx<AppSettings> settings = AppSettings.empty.obs;
@@ -102,6 +103,7 @@ class SettingsController extends GetxController {
         apiKeyController.text = loaded.openAiApiKey;
         senderNameController.text = loaded.senderName;
         profileController.text = loaded.profileSummary;
+        signatureController.text = loaded.emailSignature;
       },
     );
 
@@ -160,6 +162,7 @@ class SettingsController extends GetxController {
     final AppSettings updated = settings.value.copyWith(
       senderName: senderNameController.text.trim(),
       profileSummary: profileController.text.trim(),
+      emailSignature: signatureController.text.trim(),
     );
     final result = await _updateSettings(updated);
     if (result.isRight()) {
@@ -293,6 +296,7 @@ class SettingsController extends GetxController {
     apiKeyController.dispose();
     senderNameController.dispose();
     profileController.dispose();
+    signatureController.dispose();
     super.onClose();
   }
 }

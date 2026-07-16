@@ -27,17 +27,21 @@ class AppDatabase {
   final String? _pathOverride;
 
   Database? _database;
+  Future<Database>? _opening;
 
   /// Returns the open database, opening (and creating/migrating) it lazily on
-  /// first access.
-  Future<Database> get database async {
+  /// first access. Concurrent first-callers share a single open operation so
+  /// the database file is never opened more than once.
+  Future<Database> get database {
     final Database? existing = _database;
     if (existing != null && existing.isOpen) {
-      return existing;
+      return Future<Database>.value(existing);
     }
-    final Database opened = await _open();
-    _database = opened;
-    return opened;
+    return _opening ??= _open().then((Database opened) {
+      _database = opened;
+      _opening = null;
+      return opened;
+    });
   }
 
   Future<Database> _open() async {

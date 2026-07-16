@@ -15,6 +15,7 @@ class AppSettings extends Equatable {
     this.gmailAccountEmail,
     this.senderName = '',
     this.profileSummary = '',
+    this.emailSignature = '',
   });
 
   /// Empty/default settings for first launch.
@@ -34,6 +35,11 @@ class AppSettings extends Equatable {
   /// compute a meaningful match score.
   final String profileSummary;
 
+  /// Multi-line signature block appended to every application email (name,
+  /// role, phone, email, links). Stored as plain text; converted to HTML when
+  /// appended to the outgoing email.
+  final String emailSignature;
+
   bool get hasOpenAiKey => openAiApiKey.trim().isNotEmpty;
 
   bool get isGmailConnected =>
@@ -46,6 +52,7 @@ class AppSettings extends Equatable {
     String? gmailAccountEmail,
     String? senderName,
     String? profileSummary,
+    String? emailSignature,
   }) {
     return AppSettings(
       openAiApiKey: openAiApiKey ?? this.openAiApiKey,
@@ -54,6 +61,7 @@ class AppSettings extends Equatable {
       gmailAccountEmail: gmailAccountEmail ?? this.gmailAccountEmail,
       senderName: senderName ?? this.senderName,
       profileSummary: profileSummary ?? this.profileSummary,
+      emailSignature: emailSignature ?? this.emailSignature,
     );
   }
 
@@ -66,6 +74,7 @@ class AppSettings extends Equatable {
       themeMode: themeMode,
       senderName: senderName,
       profileSummary: profileSummary,
+      emailSignature: emailSignature,
     );
   }
 
@@ -77,5 +86,6 @@ class AppSettings extends Equatable {
         gmailAccountEmail,
         senderName,
         profileSummary,
+        emailSignature,
       ];
 }
