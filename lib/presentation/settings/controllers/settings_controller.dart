@@ -18,19 +18,19 @@ import 'package:flutter_apply_ai/domain/usecases/resume/delete_resume_usecase.da
 import 'package:flutter_apply_ai/domain/usecases/resume/get_resumes_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/resume/set_default_resume_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/get_settings_usecase.dart';
-import 'package:flutter_apply_ai/domain/usecases/settings/save_gemini_api_key_usecase.dart';
+import 'package:flutter_apply_ai/domain/usecases/settings/save_openai_api_key_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/update_settings_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/usecase.dart';
 import 'package:flutter_apply_ai/presentation/shared/controllers/theme_controller.dart';
 import 'package:flutter_apply_ai/presentation/shared/theme_mode_x.dart';
 import 'package:get/get.dart';
 
-/// ViewModel for the Settings screen: Gemini API key, resume management, Gmail
+/// ViewModel for the Settings screen: OpenAI API key, resume management, Gmail
 /// connection, and appearance (theme).
 class SettingsController extends GetxController {
   SettingsController({
     required GetSettingsUseCase getSettings,
-    required SaveGeminiApiKeyUseCase saveGeminiApiKey,
+    required SaveOpenAiApiKeyUseCase saveOpenAiApiKey,
     required UpdateSettingsUseCase updateSettings,
     required GetResumesUseCase getResumes,
     required AddResumeUseCase addResume,
@@ -42,7 +42,7 @@ class SettingsController extends GetxController {
     required ThemeController themeController,
     required AppLogger logger,
   })  : _getSettings = getSettings,
-        _saveGeminiApiKey = saveGeminiApiKey,
+        _saveOpenAiApiKey = saveOpenAiApiKey,
         _updateSettings = updateSettings,
         _getResumes = getResumes,
         _addResume = addResume,
@@ -55,7 +55,7 @@ class SettingsController extends GetxController {
         _logger = logger;
 
   final GetSettingsUseCase _getSettings;
-  final SaveGeminiApiKeyUseCase _saveGeminiApiKey;
+  final SaveOpenAiApiKeyUseCase _saveOpenAiApiKey;
   final UpdateSettingsUseCase _updateSettings;
   final GetResumesUseCase _getResumes;
   final AddResumeUseCase _addResume;
@@ -99,7 +99,7 @@ class SettingsController extends GetxController {
       },
       (AppSettings loaded) {
         settings.value = loaded;
-        apiKeyController.text = loaded.geminiApiKey;
+        apiKeyController.text = loaded.openAiApiKey;
         senderNameController.text = loaded.senderName;
         profileController.text = loaded.profileSummary;
       },
@@ -138,18 +138,18 @@ class SettingsController extends GetxController {
 
   Future<void> saveApiKey() async {
     final String key = apiKeyController.text.trim();
-    final String? error = InputValidators.geminiApiKey(key);
+    final String? error = InputValidators.openAiApiKey(key);
     if (error != null) {
       _notify('Invalid API key', error);
       return;
     }
 
     savingApiKey.value = true;
-    final result = await _saveGeminiApiKey(key);
+    final result = await _saveOpenAiApiKey(key);
     savingApiKey.value = false;
 
     if (result.isRight()) {
-      settings.value = settings.value.copyWith(geminiApiKey: key);
+      settings.value = settings.value.copyWith(openAiApiKey: key);
       _notify('Saved', 'OpenAI API key saved securely.');
     } else {
       _notify('Error', _messageOf(result));

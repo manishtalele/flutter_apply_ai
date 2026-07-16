@@ -2,7 +2,7 @@ import 'package:flutter_apply_ai/core/utils/typedefs.dart';
 import 'package:flutter_apply_ai/domain/entities/app_settings.dart';
 
 /// Settings contract. Non-secret fields persist to SharedPreferences; the
-/// Gemini API key is handled separately via secure storage.
+/// OpenAI API key is handled separately via secure storage.
 abstract interface class SettingsRepository {
   /// Loads the full settings, merging the securely-stored API key with the
   /// non-secret preferences bundle.
@@ -12,10 +12,10 @@ abstract interface class SettingsRepository {
   /// label, sender name). The API key is NOT written by this method.
   ResultFuture<void> saveSettings(AppSettings settings);
 
-  /// Returns the stored Gemini API key, or an empty string if none is set.
-  ResultFuture<String> getGeminiApiKey();
+  /// Returns the stored OpenAI API key, or an empty string if none is set.
+  ResultFuture<String> getOpenAiApiKey();
 
-  ResultFuture<void> saveGeminiApiKey(String apiKey);
+  ResultFuture<void> saveOpenAiApiKey(String apiKey);
 
-  ResultFuture<void> clearGeminiApiKey();
+  ResultFuture<void> clearOpenAiApiKey();
 }

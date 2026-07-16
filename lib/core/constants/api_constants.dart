@@ -1,14 +1,15 @@
-/// Remote API endpoints and identifiers for Gemini and Gmail/OAuth2.
+/// Remote API endpoints and identifiers for OpenAI and Gmail/OAuth2.
 ///
-/// The Gemini API key is passed as a query parameter at call time (never
-/// stored here). Gmail/OAuth constants are defined now and consumed in
-/// Modules 10/16/17.
+/// The OpenAI API key is sent as a Bearer token at call time (never stored
+/// here). Change [openAiModel] to any model your account can access that
+/// supports the Responses API + structured outputs (e.g. `gpt-4o`,
+/// `gpt-4.1`).
 abstract final class ApiConstants {
   const ApiConstants._();
 
-  // ── Gemini (Generative Language API) ─────────────────────────────────
+  // ── OpenAI (Responses API) ───────────────────────────────────────────
   static const String openAiBaseUrl = 'https://api.openai.com';
-  static const String openAiModel = 'gpt-5.6';
+  static const String openAiModel = 'gpt-4o';
   static const String openAiResponsesPath = '/v1/responses';
 
   // ── Gmail REST API ───────────────────────────────────────────────────

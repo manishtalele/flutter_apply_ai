@@ -7,10 +7,10 @@ import 'package:flutter_apply_ai/data/datasources/local/app_database.dart';
 import 'package:flutter_apply_ai/data/datasources/local/application_local_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/local/secure_storage_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/local/settings_local_datasource.dart';
-import 'package:flutter_apply_ai/data/datasources/remote/openai_remote_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/remote/gmail_auth_service.dart';
 import 'package:flutter_apply_ai/data/datasources/remote/gmail_remote_datasource.dart';
 import 'package:flutter_apply_ai/data/datasources/remote/gmail_token_store.dart';
+import 'package:flutter_apply_ai/data/datasources/remote/openai_remote_datasource.dart';
 import 'package:flutter_apply_ai/data/repositories/ai_repository_impl.dart';
 import 'package:flutter_apply_ai/data/repositories/application_repository_impl.dart';
 import 'package:flutter_apply_ai/data/repositories/gmail_repository_impl.dart';
@@ -37,7 +37,7 @@ import 'package:flutter_apply_ai/domain/usecases/resume/delete_resume_usecase.da
 import 'package:flutter_apply_ai/domain/usecases/resume/get_resumes_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/resume/set_default_resume_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/get_settings_usecase.dart';
-import 'package:flutter_apply_ai/domain/usecases/settings/save_gemini_api_key_usecase.dart';
+import 'package:flutter_apply_ai/domain/usecases/settings/save_openai_api_key_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/update_settings_usecase.dart';
 import 'package:flutter_apply_ai/presentation/shared/controllers/theme_controller.dart';
 import 'package:flutter_apply_ai/presentation/shared/theme_mode_x.dart';
@@ -218,8 +218,8 @@ abstract final class ServiceLocator {
       GetSettingsUseCase(settingsRepository),
       permanent: true,
     );
-    Get.put<SaveGeminiApiKeyUseCase>(
-      SaveGeminiApiKeyUseCase(settingsRepository),
+    Get.put<SaveOpenAiApiKeyUseCase>(
+      SaveOpenAiApiKeyUseCase(settingsRepository),
       permanent: true,
     );
     Get.put<UpdateSettingsUseCase>(

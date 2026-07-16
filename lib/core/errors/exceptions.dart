@@ -47,7 +47,7 @@ class ServerException extends AppException {
   final int? statusCode;
 }
 
-/// Gemini AI request failed or returned an unparseable response.
+/// OpenAI request failed or returned an unparseable response.
 class AiException extends AppException {
   const AiException(super.message, [super.cause]);
 }

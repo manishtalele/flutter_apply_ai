@@ -5,7 +5,7 @@ import 'package:flutter_apply_ai/core/utils/app_logger.dart';
 
 /// Factory for pre-configured [Dio] instances (timeouts + JSON + logging).
 ///
-/// A separate client is created per remote host (Gemini, Gmail) because they
+/// A separate client is created per remote host (OpenAI, Gmail) because they
 /// use different base URLs and auth mechanisms. Additional per-client
 /// interceptors (e.g. the Gmail bearer-token interceptor in Module 10) can be
 /// passed via [extraInterceptors].

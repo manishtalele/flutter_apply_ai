@@ -1,7 +1,7 @@
 import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
 
 /// Data-layer DTO for [JobPosting]. Deserializes the structured JSON returned
-/// by Gemini. Parsing is defensive: the model coerces loose types (a number
+/// by OpenAI. Parsing is defensive: the model coerces loose types (a number
 /// as a string, skills as a comma-joined string, a bool as "true"/"1") into
 /// the strict entity shape so a slightly-off AI response never crashes the UI.
 class JobPostingModel extends JobPosting {

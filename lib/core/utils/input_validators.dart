@@ -4,8 +4,8 @@
 abstract final class InputValidators {
   const InputValidators._();
 
-  /// Gemini API keys are long opaque strings; require a sane minimum length.
-  static String? geminiApiKey(String? value) {
+  /// OpenAI API keys are long opaque strings; require a sane minimum length.
+  static String? openAiApiKey(String? value) {
     final String trimmed = (value ?? '').trim();
     if (trimmed.isEmpty) {
       return 'API key is required.';

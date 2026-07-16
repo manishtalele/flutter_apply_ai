@@ -14,7 +14,7 @@ import 'package:flutter_apply_ai/domain/usecases/resume/delete_resume_usecase.da
 import 'package:flutter_apply_ai/domain/usecases/resume/get_resumes_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/resume/set_default_resume_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/get_settings_usecase.dart';
-import 'package:flutter_apply_ai/domain/usecases/settings/save_gemini_api_key_usecase.dart';
+import 'package:flutter_apply_ai/domain/usecases/settings/save_openai_api_key_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/update_settings_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/usecase.dart';
 import 'package:flutter_apply_ai/presentation/settings/controllers/settings_controller.dart';
@@ -26,7 +26,7 @@ class _MockGetSettings extends Mock implements GetSettingsUseCase {}
 
 class _MockGetResumes extends Mock implements GetResumesUseCase {}
 
-class _MockSaveKey extends Mock implements SaveGeminiApiKeyUseCase {}
+class _MockSaveKey extends Mock implements SaveOpenAiApiKeyUseCase {}
 
 class _MockUpdateSettings extends Mock implements UpdateSettingsUseCase {}
 
@@ -59,12 +59,12 @@ class _SilentLogger implements AppLogger {
 }
 
 void main() {
-  group('InputValidators.geminiApiKey', () {
+  group('InputValidators.openAiApiKey', () {
     test('rejects empty and short keys, accepts long keys', () {
-      expect(InputValidators.geminiApiKey(''), isNotNull);
-      expect(InputValidators.geminiApiKey('short'), isNotNull);
+      expect(InputValidators.openAiApiKey(''), isNotNull);
+      expect(InputValidators.openAiApiKey('short'), isNotNull);
       expect(
-        InputValidators.geminiApiKey('a-sufficiently-long-api-key-1234'),
+        InputValidators.openAiApiKey('a-sufficiently-long-api-key-1234'),
         isNull,
       );
     });
@@ -87,7 +87,7 @@ void main() {
       final _MockGetResumes getResumes = _MockGetResumes();
 
       const AppSettings settings = AppSettings(
-        geminiApiKey: 'a-sufficiently-long-api-key-1234',
+        openAiApiKey: 'a-sufficiently-long-api-key-1234',
         senderName: 'Jane Doe',
         themeMode: AppThemeMode.dark,
       );
@@ -107,7 +107,7 @@ void main() {
 
       final SettingsController controller = SettingsController(
         getSettings: getSettings,
-        saveGeminiApiKey: _MockSaveKey(),
+        saveOpenAiApiKey: _MockSaveKey(),
         updateSettings: _MockUpdateSettings(),
         getResumes: getResumes,
         addResume: _MockAddResume(),
@@ -124,7 +124,7 @@ void main() {
 
       expect(controller.loadState.value, ViewState.success);
       expect(controller.settings.value.senderName, 'Jane Doe');
-      expect(controller.apiKeyController.text, settings.geminiApiKey);
+      expect(controller.apiKeyController.text, settings.openAiApiKey);
       expect(controller.resumes, hasLength(1));
       expect(controller.isGmailConnected, isFalse);
     });

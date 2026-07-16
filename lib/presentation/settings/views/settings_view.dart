@@ -89,7 +89,7 @@ class _OpenAiSection extends StatelessWidget {
               Obx(
                 () => Expanded(
                   child: _StatusText(
-                    ok: controller.settings.value.hasGeminiKey,
+                    ok: controller.settings.value.hasOpenAiKey,
                     okText: 'API key configured',
                     notText: 'No API key set',
                   ),

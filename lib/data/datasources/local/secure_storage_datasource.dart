@@ -2,7 +2,7 @@ import 'package:flutter_apply_ai/core/errors/exceptions.dart';
 import 'package:flutter_apply_ai/core/utils/app_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Secure persistence for secrets (Gemini API key, Gmail OAuth tokens),
+/// Secure persistence for secrets (OpenAI API key, Gmail OAuth tokens),
 /// backed by the OS credential store (Windows Credential Manager / macOS
 /// Keychain / libsecret). Values are read/written by the [StorageKeys]
 /// `secure*` keys.

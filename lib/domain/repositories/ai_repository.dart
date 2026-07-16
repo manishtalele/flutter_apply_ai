@@ -2,8 +2,8 @@ import 'package:flutter_apply_ai/core/utils/typedefs.dart';
 import 'package:flutter_apply_ai/domain/entities/enums/reply_outcome.dart';
 import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
 
-/// AI contract (Gemini). The interface lives in Domain; the implementation
-/// (Module 9) lives in Data and hides Dio/Gemini entirely.
+/// AI contract (OpenAI). The interface lives in Domain; the implementation
+/// (Module 9) lives in Data and hides Dio/OpenAI entirely.
 abstract interface class AiRepository {
   /// Analyzes a raw, pasted job description and returns the structured
   /// [JobPosting] (company, email, role, generated subject/body, match score,

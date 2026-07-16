@@ -9,7 +9,7 @@ import 'package:flutter_apply_ai/domain/entities/app_settings.dart';
 import 'package:flutter_apply_ai/domain/repositories/settings_repository.dart';
 
 /// [SettingsRepository] over SharedPreferences (non-secret bundle) + secure
-/// storage (Gemini API key). Keeps the secret out of preferences by loading
+/// storage (OpenAI API key). Keeps the secret out of preferences by loading
 /// it from secure storage only when assembling the full [AppSettings].
 class SettingsRepositoryImpl
     with RepositoryErrorMapper
@@ -33,10 +33,10 @@ class SettingsRepositoryImpl
   ResultFuture<AppSettings> getSettings() {
     return guard<AppSettings>(() async {
       final String apiKey =
-          await _secure.read(StorageKeys.secureGeminiApiKey) ?? '';
+          await _secure.read(StorageKeys.secureOpenAiApiKey) ?? '';
       final Map<String, dynamic> bundle =
           await _settings.readSettingsBundle();
-      return AppSettingsModel.fromPrefsJson(bundle, geminiApiKey: apiKey);
+      return AppSettingsModel.fromPrefsJson(bundle, openAiApiKey: apiKey);
     });
   }
 
@@ -49,21 +49,21 @@ class SettingsRepositoryImpl
   }
 
   @override
-  ResultFuture<String> getGeminiApiKey() {
+  ResultFuture<String> getOpenAiApiKey() {
     return guard<String>(
-      () async => await _secure.read(StorageKeys.secureGeminiApiKey) ?? '',
+      () async => await _secure.read(StorageKeys.secureOpenAiApiKey) ?? '',
     );
   }
 
   @override
-  ResultVoid saveGeminiApiKey(String apiKey) {
+  ResultVoid saveOpenAiApiKey(String apiKey) {
     return guard<void>(
-      () => _secure.write(StorageKeys.secureGeminiApiKey, apiKey.trim()),
+      () => _secure.write(StorageKeys.secureOpenAiApiKey, apiKey.trim()),
     );
   }
 
   @override
-  ResultVoid clearGeminiApiKey() {
-    return guard<void>(() => _secure.delete(StorageKeys.secureGeminiApiKey));
+  ResultVoid clearOpenAiApiKey() {
+    return guard<void>(() => _secure.delete(StorageKeys.secureOpenAiApiKey));
   }
 }

@@ -3,9 +3,9 @@ import 'package:flutter_apply_ai/core/utils/app_logger.dart';
 
 /// Dio interceptor that logs request/response/error lifecycle for diagnostics.
 ///
-/// Deliberately logs only the method and *path* (never the full URI or query
-/// string) so the Gemini API key — passed as a `?key=` query parameter — is
-/// never written to logs.
+/// Deliberately logs only the method and *path* (never the full URI, query
+/// string, or headers) so secrets — the OpenAI API key (Bearer token) and
+/// Gmail OAuth tokens — are never written to logs.
 class LoggingInterceptor extends Interceptor {
   LoggingInterceptor({required AppLogger logger}) : _logger = logger;
 

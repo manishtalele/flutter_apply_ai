@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('JobPostingModel.fromJson', () {
-    test('parses a well-formed Gemini response', () {
+    test('parses a well-formed OpenAI response', () {
       final JobPostingModel model = JobPostingModel.fromJson(const <String, dynamic>{
         'company': 'Acme Corp',
         'email': 'jobs@acme.com',

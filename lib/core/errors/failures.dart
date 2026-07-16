@@ -42,7 +42,7 @@ class ServerFailure extends Failure {
   List<Object?> get props => <Object?>[message, statusCode];
 }
 
-/// Gemini AI failure (request failed / unparseable response).
+/// OpenAI failure (request failed / unparseable response).
 class AiFailure extends Failure {
   const AiFailure(super.message);
 }

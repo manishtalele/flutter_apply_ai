@@ -46,7 +46,7 @@ class OpenAiRemoteDataSourceImpl implements OpenAiRemoteDataSource {
         ApiConstants.openAiResponsesPath,
         options: Options(
           headers: <String, String>{
-            Headers.authorizationHeader: 'Bearer ${apiKey.trim()}',
+            'Authorization': 'Bearer ${apiKey.trim()}',
           },
         ),
         data: <String, dynamic>{
@@ -63,9 +63,8 @@ class OpenAiRemoteDataSourceImpl implements OpenAiRemoteDataSource {
               'schema': responseSchema,
             },
           },
-          // The selected model uses its default reasoning behavior. The
-          // previous Gemini temperature value is intentionally not sent,
-          // because newer OpenAI reasoning models do not accept it.
+          // Temperature is intentionally omitted: some OpenAI models
+          // (reasoning models) reject it, and the default suits extraction.
         },
       );
 

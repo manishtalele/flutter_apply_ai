@@ -67,7 +67,7 @@ class HomeController extends GetxController {
   bool get canApply =>
       (posting.value?.isSendable ?? false) && !applying.value;
 
-  bool get needsApiKey => !settings.value.hasGeminiKey;
+  bool get needsApiKey => !settings.value.hasOpenAiKey;
   bool get needsGmail => !settings.value.isGmailConnected;
   bool get needsResume => resumes.isEmpty;
   bool get needsSetup => needsApiKey || needsGmail || needsResume;

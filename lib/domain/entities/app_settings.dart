@@ -3,13 +3,13 @@ import 'package:flutter_apply_ai/domain/entities/enums/app_theme_mode.dart';
 
 /// User-configurable application settings.
 ///
-/// [geminiApiKey] and Gmail credentials are secrets: the data layer persists
+/// [openAiApiKey] and Gmail credentials are secrets: the data layer persists
 /// the key via secure storage and never in plain preferences. Non-secret
 /// fields (theme, default resume, connected account label) go to
 /// SharedPreferences.
 class AppSettings extends Equatable {
   const AppSettings({
-    this.geminiApiKey = '',
+    this.openAiApiKey = '',
     this.defaultResumeId,
     this.themeMode = AppThemeMode.dark,
     this.gmailAccountEmail,
@@ -20,7 +20,7 @@ class AppSettings extends Equatable {
   /// Empty/default settings for first launch.
   static const AppSettings empty = AppSettings();
 
-  final String geminiApiKey;
+  final String openAiApiKey;
   final String? defaultResumeId;
   final AppThemeMode themeMode;
 
@@ -34,13 +34,13 @@ class AppSettings extends Equatable {
   /// compute a meaningful match score.
   final String profileSummary;
 
-  bool get hasGeminiKey => geminiApiKey.trim().isNotEmpty;
+  bool get hasOpenAiKey => openAiApiKey.trim().isNotEmpty;
 
   bool get isGmailConnected =>
       gmailAccountEmail != null && gmailAccountEmail!.trim().isNotEmpty;
 
   AppSettings copyWith({
-    String? geminiApiKey,
+    String? openAiApiKey,
     String? defaultResumeId,
     AppThemeMode? themeMode,
     String? gmailAccountEmail,
@@ -48,7 +48,7 @@ class AppSettings extends Equatable {
     String? profileSummary,
   }) {
     return AppSettings(
-      geminiApiKey: geminiApiKey ?? this.geminiApiKey,
+      openAiApiKey: openAiApiKey ?? this.openAiApiKey,
       defaultResumeId: defaultResumeId ?? this.defaultResumeId,
       themeMode: themeMode ?? this.themeMode,
       gmailAccountEmail: gmailAccountEmail ?? this.gmailAccountEmail,
@@ -61,7 +61,7 @@ class AppSettings extends Equatable {
   /// method is used because `copyWith` cannot set a field back to `null`.
   AppSettings withGmailDisconnected() {
     return AppSettings(
-      geminiApiKey: geminiApiKey,
+      openAiApiKey: openAiApiKey,
       defaultResumeId: defaultResumeId,
       themeMode: themeMode,
       senderName: senderName,
@@ -71,7 +71,7 @@ class AppSettings extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
-        geminiApiKey,
+        openAiApiKey,
         defaultResumeId,
         themeMode,
         gmailAccountEmail,

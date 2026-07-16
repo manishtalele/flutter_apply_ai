@@ -7,7 +7,7 @@ import 'package:flutter_apply_ai/domain/usecases/resume/delete_resume_usecase.da
 import 'package:flutter_apply_ai/domain/usecases/resume/get_resumes_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/resume/set_default_resume_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/get_settings_usecase.dart';
-import 'package:flutter_apply_ai/domain/usecases/settings/save_gemini_api_key_usecase.dart';
+import 'package:flutter_apply_ai/domain/usecases/settings/save_openai_api_key_usecase.dart';
 import 'package:flutter_apply_ai/domain/usecases/settings/update_settings_usecase.dart';
 import 'package:flutter_apply_ai/presentation/settings/controllers/settings_controller.dart';
 import 'package:flutter_apply_ai/presentation/shared/controllers/theme_controller.dart';
@@ -22,7 +22,7 @@ class SettingsBinding extends Bindings {
     Get.lazyPut<SettingsController>(
       () => SettingsController(
         getSettings: Get.find<GetSettingsUseCase>(),
-        saveGeminiApiKey: Get.find<SaveGeminiApiKeyUseCase>(),
+        saveOpenAiApiKey: Get.find<SaveOpenAiApiKeyUseCase>(),
         updateSettings: Get.find<UpdateSettingsUseCase>(),
         getResumes: Get.find<GetResumesUseCase>(),
         addResume: Get.find<AddResumeUseCase>(),

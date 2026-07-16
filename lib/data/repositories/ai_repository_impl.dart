@@ -77,7 +77,7 @@ class AiRepositoryImpl with RepositoryErrorMapper implements AiRepository {
   /// Loads the OpenAI API key, throwing an [AiException] (mapped to
   /// [AiFailure]) if it is missing so the UI can prompt the user to set it.
   Future<String> _requireApiKey() async {
-    final Result<String> result = await _settings.getGeminiApiKey();
+    final Result<String> result = await _settings.getOpenAiApiKey();
     return result.fold(
       (_) => throw const AiException(
         'Unable to read the OpenAI API key.',

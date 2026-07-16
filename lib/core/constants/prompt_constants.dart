@@ -1,11 +1,11 @@
 import 'package:flutter_apply_ai/core/utils/typedefs.dart';
 
-/// Gemini prompt templates and response schemas.
+/// OpenAI prompt templates and response schemas.
 ///
-/// Structured output is enforced via `generationConfig.responseSchema` (an
-/// OpenAPI-subset schema), so the model returns strict JSON — never free text
-/// requiring regex extraction. The system instruction sets role and rules; the
-/// user content carries the actual data.
+/// Structured output is enforced via the Responses API `text.format`
+/// `json_schema` (strict) — the model returns schema-conformant JSON, never
+/// free text requiring regex extraction. The system instruction sets role and
+/// rules; the user content carries the actual data.
 abstract final class PromptConstants {
   const PromptConstants._();
 

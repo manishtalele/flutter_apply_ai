@@ -15,7 +15,7 @@ abstract final class StorageKeys {
   static const String resumesList = 'resumes_list_v1';
 
   // ── Secure storage (secrets) ─────────────────────────────────────────
-  static const String secureGeminiApiKey = 'secure_gemini_api_key';
+  static const String secureOpenAiApiKey = 'secure_openai_api_key';
   static const String secureGmailAccessToken = 'secure_gmail_access_token';
   static const String secureGmailRefreshToken = 'secure_gmail_refresh_token';
   static const String secureGmailTokenExpiry = 'secure_gmail_token_expiry';
