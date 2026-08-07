@@ -17,6 +17,11 @@ class AppSettingsModel extends AppSettings {
     super.senderName,
     super.profileSummary,
     super.emailSignature,
+    super.currentLocation,
+    super.totalExperience,
+    super.currentCtc,
+    super.expectedCtc,
+    super.noticePeriod,
   });
 
   factory AppSettingsModel.fromEntity(AppSettings entity) {
@@ -28,6 +33,11 @@ class AppSettingsModel extends AppSettings {
       senderName: entity.senderName,
       profileSummary: entity.profileSummary,
       emailSignature: entity.emailSignature,
+      currentLocation: entity.currentLocation,
+      totalExperience: entity.totalExperience,
+      currentCtc: entity.currentCtc,
+      expectedCtc: entity.expectedCtc,
+      noticePeriod: entity.noticePeriod,
     );
   }
 
@@ -47,6 +57,13 @@ class AppSettingsModel extends AppSettings {
       senderName: (json['senderName'] as String?) ?? '',
       profileSummary: (json['profileSummary'] as String?) ?? '',
       emailSignature: (json['emailSignature'] as String?) ?? '',
+      // Added after v1 of the bundle — absent for users upgrading, hence the
+      // null-coalescing defaults rather than a bundle version bump.
+      currentLocation: (json['currentLocation'] as String?) ?? '',
+      totalExperience: (json['totalExperience'] as String?) ?? '',
+      currentCtc: (json['currentCtc'] as String?) ?? '',
+      expectedCtc: (json['expectedCtc'] as String?) ?? '',
+      noticePeriod: (json['noticePeriod'] as String?) ?? '',
     );
   }
 
@@ -59,6 +76,11 @@ class AppSettingsModel extends AppSettings {
       'senderName': senderName,
       'profileSummary': profileSummary,
       'emailSignature': emailSignature,
+      'currentLocation': currentLocation,
+      'totalExperience': totalExperience,
+      'currentCtc': currentCtc,
+      'expectedCtc': expectedCtc,
+      'noticePeriod': noticePeriod,
     };
   }
 }

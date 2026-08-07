@@ -1,3 +1,4 @@
+import 'package:flutter_apply_ai/domain/entities/enums/candidate_detail.dart';
 import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
 
 /// Data-layer DTO for [JobPosting]. Deserializes the structured JSON returned
@@ -18,6 +19,7 @@ class JobPostingModel extends JobPosting {
     required super.shouldApply,
     super.matchSummary,
     super.phone,
+    super.requestedDetails,
   });
 
   factory JobPostingModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class JobPostingModel extends JobPosting {
       shouldApply: _asBool(json['shouldApply']),
       matchSummary: _asString(json['matchSummary']),
       phone: _asString(json['phone']),
+      requestedDetails: _asRequestedDetails(json['requestedDetails']),
     );
   }
 
@@ -51,6 +54,7 @@ class JobPostingModel extends JobPosting {
       shouldApply: entity.shouldApply,
       matchSummary: entity.matchSummary,
       phone: entity.phone,
+      requestedDetails: entity.requestedDetails,
     );
   }
 
@@ -68,7 +72,30 @@ class JobPostingModel extends JobPosting {
       'shouldApply': shouldApply,
       'matchSummary': matchSummary,
       'phone': phone,
+      'requestedDetails': requestedDetails
+          .map((CandidateDetail detail) => detail.value)
+          .toList(growable: false),
     };
+  }
+
+  /// Maps the AI's tokens onto [CandidateDetail], dropping anything
+  /// unrecognized (a schema `enum` should prevent that, but a stray value must
+  /// not break the whole analysis) and de-duplicating repeats.
+  static List<CandidateDetail> _asRequestedDetails(Object? value) {
+    if (value is! List) {
+      return const <CandidateDetail>[];
+    }
+    final List<CandidateDetail> details = <CandidateDetail>[];
+    for (final Object? item in value) {
+      if (item is! String) {
+        continue;
+      }
+      final CandidateDetail? detail = CandidateDetail.fromValue(item.trim());
+      if (detail != null && !details.contains(detail)) {
+        details.add(detail);
+      }
+    }
+    return List<CandidateDetail>.unmodifiable(details);
   }
 
   static String _asString(Object? value) {

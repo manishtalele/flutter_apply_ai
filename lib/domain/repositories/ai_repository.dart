@@ -9,9 +9,14 @@ abstract interface class AiRepository {
   /// [JobPosting] (company, email, role, generated subject/body, match score,
   /// recommendation). [candidateProfile] describes the applicant (skills /
   /// experience) so the AI can compute a meaningful match score.
+  /// [candidateDetails] carries the structured facts a post may ask applicants
+  /// to state (current location, CTC, notice period …) as label→value pairs;
+  /// only filled-in details are passed, so the AI can answer what the post
+  /// asks for without inventing anything.
   ResultFuture<JobPosting> extractJobPosting(
     String rawText, {
     String candidateProfile = '',
+    Map<String, String> candidateDetails = const <String, String>{},
   });
 
   /// Classifies an employer's reply email into a [ReplyOutcome] used to update

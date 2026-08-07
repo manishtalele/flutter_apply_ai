@@ -95,7 +95,7 @@ class GmailRepositoryImpl
         attachmentPaths: draft.attachmentPaths,
       );
 
-      final GmailSendResult result = await _remote.sendRawMessage(raw);
+      final GmailSendResult result = await _sendWithAuthContext(raw);
       return SentEmail(
         messageId: result.messageId,
         threadId: result.threadId,
@@ -137,6 +137,26 @@ class GmailRepositoryImpl
       }
       return latestIncomingBody;
     });
+  }
+
+  /// Sends the message, translating a 401 into actionable guidance.
+  ///
+  /// A 401 here means the access token was rejected AND the interceptor's
+  /// refresh attempt could not produce a working one — i.e. the Gmail session
+  /// is genuinely gone. Google's own wording ("Request had invalid
+  /// authentication credentials…") tells the user nothing they can act on.
+  Future<GmailSendResult> _sendWithAuthContext(String raw) async {
+    try {
+      return await _remote.sendRawMessage(raw);
+    } on ServerException catch (error) {
+      if (error.statusCode == 401) {
+        throw const AuthException(
+          'Your Gmail session has expired. Open Settings, disconnect Gmail, '
+          'and connect it again — then retry sending.',
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<AppSettings> _currentSettings() async {

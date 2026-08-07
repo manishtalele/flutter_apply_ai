@@ -118,7 +118,17 @@ class GmailOAuthService implements GmailAuthService {
       await _tokenStore.save(refreshed);
       return refreshed.accessToken;
     } on DioException catch (error) {
-      _logger.w('Gmail token refresh failed', error);
+      final _GoogleAuthError googleError = _GoogleAuthError.from(error);
+      _logger.w('Gmail token refresh failed — $googleError', error);
+
+      if (googleError.isDeadRefreshToken) {
+        // The refresh token will never work again (revoked, expired, or issued
+        // by a different client). Drop it so the app reports "not connected"
+        // and prompts a fresh sign-in, instead of retrying it on every
+        // request and failing with a confusing 401.
+        _logger.w('Clearing the dead Gmail refresh token — reconnect required.');
+        await _tokenStore.clear();
+      }
       return null;
     }
   }
@@ -225,6 +235,7 @@ class GmailOAuthService implements GmailAuthService {
     return base64UrlEncode(digest.bytes).replaceAll('=', '');
   }
 
+  /// Renders the OAuth loopback landing page shown in the user's browser.
   String _resultPage({required bool success}) {
     final String title = success ? 'Sign-in complete' : 'Sign-in failed';
     final String body = success
@@ -234,5 +245,48 @@ class GmailOAuthService implements GmailAuthService {
         '<title>$title</title></head>'
         '<body style="font-family:sans-serif;text-align:center;padding:48px">'
         '<h2>$title</h2><p>$body</p></body></html>';
+  }
+}
+
+/// The OAuth2 error payload Google's token endpoint returns alongside a 4xx:
+/// `{"error": "invalid_grant", "error_description": "Token has been expired
+/// or revoked."}`.
+///
+/// Without surfacing this, every token failure looks like an indistinguishable
+/// "400" in the logs — a dead refresh token and a misconfigured client are
+/// very different problems with very different fixes.
+class _GoogleAuthError {
+  const _GoogleAuthError({this.code, this.description});
+
+  factory _GoogleAuthError.from(DioException error) {
+    final Object? data = error.response?.data;
+    if (data is Map) {
+      final Object? code = data['error'];
+      final Object? description = data['error_description'];
+      return _GoogleAuthError(
+        code: code is String ? code : null,
+        description: description is String ? description : null,
+      );
+    }
+    return const _GoogleAuthError();
+  }
+
+  final String? code;
+  final String? description;
+
+  /// True when the refresh token itself is permanently unusable, so retrying
+  /// is pointless and only a fresh sign-in can recover.
+  ///
+  /// Google returns `invalid_grant` when the token was revoked, when the user
+  /// changed their password, or when it simply expired — which happens after
+  /// 7 days for an OAuth app still in "Testing" publishing status.
+  bool get isDeadRefreshToken => code == 'invalid_grant';
+
+  @override
+  String toString() {
+    if (code == null) {
+      return 'no OAuth error code in the response';
+    }
+    return description == null ? code! : '$code: $description';
   }
 }

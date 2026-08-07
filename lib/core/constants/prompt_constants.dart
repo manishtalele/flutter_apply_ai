@@ -1,4 +1,5 @@
 import 'package:flutter_apply_ai/core/utils/typedefs.dart';
+import 'package:flutter_apply_ai/domain/entities/enums/candidate_detail.dart';
 
 /// OpenAI prompt templates and response schemas.
 ///
@@ -25,13 +26,63 @@ Rules:
   its original form including the country code if present (e.g. "+91 9655573339").
   Return an empty string if no phone number is present.
 - "subject" must be a concise, professional email subject line for applying to
-  this role.
-- "emailBody" must be a professional, personalized application email in valid
-  HTML (use <p> paragraphs; no <html>/<body> wrapper). Reference the role and 1–2
-  relevant skills. Keep it under 180 words. Do not fabricate the candidate's
-  experience beyond what the provided candidate profile states. Do NOT add a
-  sign-off or signature (no "Best regards, <name>", no contact details) — a
-  signature block is appended automatically after your text.
+  this role. Job posts often dictate the subject (e.g. "Mail Subject: Android
+  Developer | Experience | Current Location"). When they do:
+  - Keep the post's exact wording, field order, and separators.
+  - Treat every field name in that template as a PLACEHOLDER TO FILL IN, never
+    as text to copy. Replace each one with the candidate's real value from
+    CANDIDATE DETAILS. For the example above with 3.5 years' experience and a
+    Pune location, the subject is "Android Developer | 3.5 years | Pune, India"
+    — NOT "Android Developer | Experience | Current Location". Shipping the
+    placeholder words unfilled is a failure.
+  - Words that are literal template text rather than a field — the role name, a
+    job ID, "Application for", a company name — stay exactly as written.
+  - If the template asks for a field the candidate details do not provide, drop
+    that segment along with its separator. Never guess a value, and never leave
+    the placeholder word standing in its place.
+  - The same substitution rule applies to any detail the post wants in the
+    subject, not just experience and location (CTC, notice period, and so on).
+  If the post dictates no subject, write your own concise one naming the role.
+- "emailBody" must be a complete, professional, personalized application email
+  in valid HTML (use <p> paragraphs and <br> for line breaks; no <html>/<body>
+  wrapper). Structure it as:
+    1. A greeting addressed to the hiring team / named recruiter if the post
+       names one.
+    2. An opening line stating the exact role being applied for (and the
+       requisition/job ID if the post has one).
+    3. One or two paragraphs mapping the candidate's actual experience and
+       skills onto the specific requirements named in the post — cite concrete
+       skills from the post that the candidate genuinely has.
+    4. The requested-details block described below, when applicable.
+    5. A closing line noting the attached resume and inviting next steps.
+  Aim for 150–250 words. Do not fabricate the candidate's experience, skills,
+  or credentials beyond what the candidate profile and candidate details state.
+  Do NOT add a sign-off or signature (no "Best regards, <name>", no contact
+  details) — a signature block is appended automatically after your text.
+- REQUESTED DETAILS — read the job post carefully for details it explicitly
+  asks applicants to share or mention in their mail (common examples: current
+  location, preferred/willing location, total experience, relevant experience,
+  current CTC, expected CTC, notice period / availability to join, current
+  company, reason for change, portfolio or GitHub link). For every such detail:
+  - If the CANDIDATE DETAILS section below provides it, state it explicitly in
+    the email as a labelled line, grouped into one block near the end of the
+    body, e.g.
+    <p><b>As requested:</b><br>Current Location: Pune, India<br>Notice Period:
+    30 days</p>
+  - If the post asks for a detail that is NOT in the candidate details or the
+    profile, simply omit that line. NEVER guess, estimate, or invent a
+    location, salary figure, notice period, or years of experience.
+  - Use only the labels the post actually asks for. If the post asks for
+    nothing specific, omit the block entirely.
+- "requestedDetails" must list which of these tracked details the post asks the
+  applicant to provide, anywhere — in the subject line, in the body, or in a
+  list of instructions: currentLocation, totalExperience, currentCtc,
+  expectedCtc, noticePeriod. Use an empty array when the post asks for none.
+  Report a detail here whenever the post asks for it, INCLUDING when the
+  candidate details do not provide it and you therefore had to leave it out —
+  this list is what tells the user which details are missing, so omitting one
+  hides the gap from them. Only report what the post genuinely asks for; do not
+  add a detail merely because the candidate happens to have supplied it.
 - "matchScore" is an integer 0–100 measuring how well the candidate profile fits
   the role's required skills, experience, and location. If no candidate profile
   is provided, base the score on general seniority/skill alignment cues.
@@ -39,22 +90,39 @@ Rules:
 - "matchSummary" is a one-sentence justification for the score and recommendation.
 Respond ONLY with JSON conforming to the provided schema.''';
 
+  /// Builds the user turn: the candidate's free-text profile, their structured
+  /// details (only the ones they filled in), then the raw job description.
+  ///
+  /// [candidateDetails] is deliberately a label→value map rather than prose so
+  /// the model can echo a requested detail verbatim, and so an unfilled field
+  /// is simply absent — leaving nothing for it to guess from.
   static String extractionUserContent({
     required String jobDescription,
     required String candidateProfile,
+    Map<String, String> candidateDetails = const <String, String>{},
   }) {
     final String profile = candidateProfile.trim().isEmpty
         ? '(No candidate profile provided.)'
         : candidateProfile.trim();
+    final String details = candidateDetails.isEmpty
+        ? '(No structured candidate details provided — do not invent any.)'
+        : candidateDetails.entries
+            .map((MapEntry<String, String> e) => '- ${e.key}: ${e.value}')
+            .join('\n');
     return '''
 CANDIDATE PROFILE:
 $profile
+
+CANDIDATE DETAILS (use verbatim; anything not listed here is unknown):
+$details
 
 JOB DESCRIPTION:
 $jobDescription''';
   }
 
-  static const DataMap jobPostingResponseSchema = <String, dynamic>{
+  // `final` rather than `const`: the requestedDetails enum is derived from
+  // [CandidateDetail] so the schema can never drift from the Dart enum.
+  static final DataMap jobPostingResponseSchema = <String, dynamic>{
     'type': 'object',
     'properties': <String, dynamic>{
       'company': <String, dynamic>{'type': 'string'},
@@ -72,6 +140,15 @@ $jobDescription''';
       'matchScore': <String, dynamic>{'type': 'integer'},
       'shouldApply': <String, dynamic>{'type': 'boolean'},
       'matchSummary': <String, dynamic>{'type': 'string'},
+      // Constrained to the CandidateDetail tokens, so the response maps
+      // straight onto the enum with no string matching on our side.
+      'requestedDetails': <String, dynamic>{
+        'type': 'array',
+        'items': <String, dynamic>{
+          'type': 'string',
+          'enum': CandidateDetail.allValues,
+        },
+      },
     },
     'required': <String>[
       'company',
@@ -86,6 +163,7 @@ $jobDescription''';
       'matchScore',
       'shouldApply',
       'matchSummary',
+      'requestedDetails',
     ],
     'additionalProperties': false,
   };

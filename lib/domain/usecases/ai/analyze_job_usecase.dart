@@ -9,13 +9,19 @@ class AnalyzeJobParams extends Equatable {
   const AnalyzeJobParams({
     required this.rawText,
     this.candidateProfile = '',
+    this.candidateDetails = const <String, String>{},
   });
 
   final String rawText;
   final String candidateProfile;
 
+  /// Structured facts (current location, CTC, notice period …) the AI may be
+  /// asked to state in the email. Only filled-in entries are present.
+  final Map<String, String> candidateDetails;
+
   @override
-  List<Object?> get props => <Object?>[rawText, candidateProfile];
+  List<Object?> get props =>
+      <Object?>[rawText, candidateProfile, candidateDetails];
 }
 
 /// Analyzes a pasted job description via the AI repository, producing a
@@ -30,6 +36,7 @@ class AnalyzeJobUseCase implements UseCase<JobPosting, AnalyzeJobParams> {
     return _aiRepository.extractJobPosting(
       params.rawText,
       candidateProfile: params.candidateProfile,
+      candidateDetails: params.candidateDetails,
     );
   }
 }

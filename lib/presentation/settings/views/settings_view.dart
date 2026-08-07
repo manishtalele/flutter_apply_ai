@@ -11,6 +11,7 @@ import 'package:flutter_apply_ai/presentation/settings/widgets/add_resume_dialog
 import 'package:flutter_apply_ai/presentation/settings/widgets/settings_section.dart';
 import 'package:flutter_apply_ai/presentation/settings/widgets/signature_preview.dart';
 import 'package:flutter_apply_ai/presentation/shared/widgets/app_button.dart';
+import 'package:flutter_apply_ai/presentation/shared/widgets/section_label.dart';
 import 'package:get/get.dart';
 
 /// Settings screen: AI key, resumes, Gmail, appearance.
@@ -122,8 +123,9 @@ class _SenderSection extends StatelessWidget {
     return SettingsSection(
       title: 'Your Profile',
       icon: Icons.badge_outlined,
-      subtitle: 'Your name (used as the email "From") and a short summary of '
-          'your skills/experience — the AI uses this to compute match scores.',
+      subtitle: 'Your name (used as the email "From"), a short summary of your '
+          'skills/experience, and the details recruiters commonly ask for — '
+          'all of it is fed to the AI when it writes your application email.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -145,7 +147,69 @@ class _SenderSection extends StatelessWidget {
               alignLabelWithHint: true,
             ),
           ),
+          const SizedBox(height: AppDimensions.spaceLg),
+          const SectionLabel(
+            'Details recruiters ask for',
+            icon: Icons.fact_check_outlined,
+          ),
+          const SizedBox(height: AppDimensions.spaceXxs),
+          Text(
+            'When a job post asks applicants to mention these, the AI states '
+            'them in the email. Leave a field blank and it is simply left out '
+            '— never guessed.',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: AppDimensions.spaceSm),
+          TextField(
+            controller: controller.locationController,
+            decoration: const InputDecoration(
+              labelText: 'Current location',
+              hintText: 'e.g. Pune, India',
+            ),
+          ),
           const SizedBox(height: AppDimensions.spaceMd),
+          TextField(
+            controller: controller.experienceController,
+            decoration: const InputDecoration(
+              labelText: 'Total experience',
+              hintText: 'e.g. 3.5 years',
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spaceMd),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  controller: controller.currentCtcController,
+                  decoration: const InputDecoration(
+                    labelText: 'Current CTC',
+                    hintText: 'e.g. 8 LPA',
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spaceMd),
+              Expanded(
+                child: TextField(
+                  controller: controller.expectedCtcController,
+                  decoration: const InputDecoration(
+                    labelText: 'Expected CTC',
+                    hintText: 'e.g. 12 LPA',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.spaceMd),
+          TextField(
+            controller: controller.noticePeriodController,
+            decoration: const InputDecoration(
+              labelText: 'Notice period',
+              hintText: 'e.g. 30 days, or Immediate joiner',
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spaceLg),
           TextField(
             controller: controller.signatureController,
             maxLines: 6,

@@ -72,6 +72,13 @@ class SettingsController extends GetxController {
   final TextEditingController profileController = TextEditingController();
   final TextEditingController signatureController = TextEditingController();
 
+  // Structured details a job post may ask the applicant to state in the mail.
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController experienceController = TextEditingController();
+  final TextEditingController currentCtcController = TextEditingController();
+  final TextEditingController expectedCtcController = TextEditingController();
+  final TextEditingController noticePeriodController = TextEditingController();
+
   final Rx<ViewState> loadState = ViewState.initial.obs;
   final Rx<AppSettings> settings = AppSettings.empty.obs;
   final RxList<ResumeProfile> resumes = <ResumeProfile>[].obs;
@@ -104,6 +111,11 @@ class SettingsController extends GetxController {
         senderNameController.text = loaded.senderName;
         profileController.text = loaded.profileSummary;
         signatureController.text = loaded.emailSignature;
+        locationController.text = loaded.currentLocation;
+        experienceController.text = loaded.totalExperience;
+        currentCtcController.text = loaded.currentCtc;
+        expectedCtcController.text = loaded.expectedCtc;
+        noticePeriodController.text = loaded.noticePeriod;
       },
     );
 
@@ -163,6 +175,11 @@ class SettingsController extends GetxController {
       senderName: senderNameController.text.trim(),
       profileSummary: profileController.text.trim(),
       emailSignature: signatureController.text.trim(),
+      currentLocation: locationController.text.trim(),
+      totalExperience: experienceController.text.trim(),
+      currentCtc: currentCtcController.text.trim(),
+      expectedCtc: expectedCtcController.text.trim(),
+      noticePeriod: noticePeriodController.text.trim(),
     );
     final result = await _updateSettings(updated);
     if (result.isRight()) {
@@ -297,6 +314,11 @@ class SettingsController extends GetxController {
     senderNameController.dispose();
     profileController.dispose();
     signatureController.dispose();
+    locationController.dispose();
+    experienceController.dispose();
+    currentCtcController.dispose();
+    expectedCtcController.dispose();
+    noticePeriodController.dispose();
     super.onClose();
   }
 }

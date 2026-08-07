@@ -33,6 +33,7 @@ class AiRepositoryImpl with RepositoryErrorMapper implements AiRepository {
   ResultFuture<JobPosting> extractJobPosting(
     String rawText, {
     String candidateProfile = '',
+    Map<String, String> candidateDetails = const <String, String>{},
   }) {
     return guard<JobPosting>(() async {
       if (rawText.trim().isEmpty) {
@@ -46,6 +47,7 @@ class AiRepositoryImpl with RepositoryErrorMapper implements AiRepository {
         userContent: PromptConstants.extractionUserContent(
           jobDescription: rawText,
           candidateProfile: candidateProfile,
+          candidateDetails: candidateDetails,
         ),
         responseSchema: PromptConstants.jobPostingResponseSchema,
       );

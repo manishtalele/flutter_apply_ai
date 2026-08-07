@@ -9,6 +9,7 @@ import 'package:flutter_apply_ai/core/utils/app_logger.dart';
 import 'package:flutter_apply_ai/core/utils/signature_formatter.dart';
 import 'package:flutter_apply_ai/domain/entities/app_settings.dart';
 import 'package:flutter_apply_ai/domain/entities/application.dart';
+import 'package:flutter_apply_ai/domain/entities/enums/candidate_detail.dart';
 import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
 import 'package:flutter_apply_ai/domain/entities/resume_profile.dart';
 import 'package:flutter_apply_ai/domain/usecases/ai/analyze_job_usecase.dart';
@@ -40,7 +41,12 @@ class HomeController extends GetxController {
         _sendApplication = sendApplication,
         _getResumes = getResumes,
         _getSettings = getSettings,
-        _logger = logger;
+        _logger = logger {
+    // Attached here rather than in onInit so the draft mirrors stay in sync
+    // even when the controller is constructed outside GetX's lifecycle.
+    subjectController.addListener(_onDraftChanged);
+    bodyController.addListener(_onDraftChanged);
+  }
 
   final AnalyzeJobUseCase _analyzeJob;
   final CheckDuplicateUseCase _checkDuplicate;
@@ -50,6 +56,20 @@ class HomeController extends GetxController {
   final AppLogger _logger;
 
   final TextEditingController pasteController = TextEditingController();
+
+  /// The editable draft. Seeded from the AI result on every analysis; whatever
+  /// is in these fields at Apply time is what gets sent and saved to History.
+  final TextEditingController subjectController = TextEditingController();
+  final TextEditingController bodyController = TextEditingController();
+
+  /// Mirrors of the two controllers above, so `Obx` widgets (the Apply button's
+  /// enabled state) react to typing — plain [TextEditingController]s are not
+  /// observable by GetX.
+  final RxString draftSubject = ''.obs;
+  final RxString draftBody = ''.obs;
+
+  /// Whether the user has changed the AI's subject or body.
+  final RxBool isEdited = false.obs;
 
   final Rx<ViewState> state = ViewState.initial.obs;
   final Rxn<JobPosting> posting = Rxn<JobPosting>();
@@ -66,8 +86,30 @@ class HomeController extends GetxController {
 
   bool get hasResult => posting.value != null;
 
-  bool get canApply =>
-      (posting.value?.isSendable ?? false) && !applying.value;
+  /// The posting as it will actually be sent: the AI's extracted fields with
+  /// the user's edited subject and body applied on top.
+  JobPosting? get draftPosting => posting.value?.copyWith(
+        subject: draftSubject.value.trim(),
+        emailBody: draftBody.value.trim(),
+      );
+
+  bool get canApply => (draftPosting?.isSendable ?? false) && !applying.value;
+
+  /// Details this post asks for that the user has not filled in under Settings.
+  ///
+  /// The AI is instructed to omit rather than invent an unknown detail, so
+  /// these are silently missing from the subject and body — surfacing them is
+  /// the only way the user finds out.
+  List<CandidateDetail> get missingRequestedDetails {
+    final JobPosting? current = posting.value;
+    if (current == null) {
+      return const <CandidateDetail>[];
+    }
+    final AppSettings saved = settings.value;
+    return current.requestedDetails
+        .where((CandidateDetail detail) => !saved.hasDetail(detail))
+        .toList(growable: false);
+  }
 
   bool get needsApiKey => !settings.value.hasOpenAiKey;
   bool get needsGmail => !settings.value.isGmailConnected;
@@ -120,6 +162,38 @@ class HomeController extends GetxController {
   }
 
   void selectResume(ResumeProfile? resume) => selectedResume.value = resume;
+
+  /// The AI's untouched output, kept so [restoreAiDraft] can undo edits.
+  String _aiSubject = '';
+  String _aiBody = '';
+
+  void _onDraftChanged() {
+    draftSubject.value = subjectController.text;
+    draftBody.value = bodyController.text;
+    isEdited.value =
+        subjectController.text != _aiSubject || bodyController.text != _aiBody;
+  }
+
+  /// Seeds the editable draft with a fresh AI result.
+  void _seedDraft({required String subject, required String body}) {
+    _aiSubject = subject;
+    _aiBody = body;
+    subjectController.text = subject;
+    bodyController.text = body;
+    // Set the mirrors explicitly rather than relying on the listener, so the
+    // draft is correct even if a listener is ever detached.
+    draftSubject.value = subject;
+    draftBody.value = body;
+    isEdited.value = false;
+  }
+
+  /// Discards the user's edits and restores the AI-generated subject and body.
+  void restoreAiDraft() {
+    if (!isEdited.value) {
+      return;
+    }
+    _seedDraft(subject: _aiSubject, body: _aiBody);
+  }
 
   /// Appends the user's saved signature (as HTML) to the AI-generated email
   /// body. No-op when the signature is empty.
@@ -235,7 +309,11 @@ class HomeController extends GetxController {
     errorMessage.value = '';
 
     final result = await _analyzeJob(
-      AnalyzeJobParams(rawText: text, candidateProfile: _candidateProfile),
+      AnalyzeJobParams(
+        rawText: text,
+        candidateProfile: _candidateProfile,
+        candidateDetails: settings.value.candidateDetails,
+      ),
     );
     result.fold(
       (Failure failure) {
@@ -245,8 +323,13 @@ class HomeController extends GetxController {
         _notify('Analysis failed', failure.message);
       },
       (JobPosting analyzed) {
-        posting.value = analyzed.copyWith(
+        final JobPosting withSignature = analyzed.copyWith(
           emailBody: _appendSignature(analyzed.emailBody),
+        );
+        posting.value = withSignature;
+        _seedDraft(
+          subject: withSignature.subject,
+          body: withSignature.emailBody,
         );
         state.value = ViewState.success;
         _logger.i('Job analyzed: ${analyzed.company} / ${analyzed.role}');
@@ -259,11 +342,12 @@ class HomeController extends GetxController {
     posting.value = null;
     errorMessage.value = '';
     extraAttachments.clear();
+    _seedDraft(subject: '', body: '');
     state.value = ViewState.initial;
   }
 
   Future<void> copyEmail() async {
-    final JobPosting? current = posting.value;
+    final JobPosting? current = draftPosting;
     if (current == null) {
       return;
     }
@@ -274,7 +358,8 @@ class HomeController extends GetxController {
   }
 
   Future<void> apply() async {
-    final JobPosting? current = posting.value;
+    // The edited draft — not the raw AI output — is what gets sent.
+    final JobPosting? current = draftPosting;
     if (current == null || applying.value) {
       return;
     }
@@ -380,6 +465,12 @@ class HomeController extends GetxController {
   void onClose() {
     _tabWorker?.dispose();
     pasteController.dispose();
+    subjectController
+      ..removeListener(_onDraftChanged)
+      ..dispose();
+    bodyController
+      ..removeListener(_onDraftChanged)
+      ..dispose();
     super.onClose();
   }
 }

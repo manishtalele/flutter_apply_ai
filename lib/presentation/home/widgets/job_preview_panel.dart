@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_apply_ai/core/enums/view_state.dart';
 import 'package:flutter_apply_ai/core/theme/app_colors.dart';
 import 'package:flutter_apply_ai/core/theme/app_dimensions.dart';
+import 'package:flutter_apply_ai/domain/entities/enums/candidate_detail.dart';
 import 'package:flutter_apply_ai/domain/entities/job_posting.dart';
 import 'package:flutter_apply_ai/domain/entities/resume_profile.dart';
 import 'package:flutter_apply_ai/presentation/home/controllers/home_controller.dart';
@@ -169,16 +170,8 @@ class _ResultContent extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spaceXs),
                 _SkillChips(skills: posting.skills),
                 const SizedBox(height: AppDimensions.spaceMd),
-                const SectionLabel('Email Subject', icon: Icons.subject_rounded),
-                const SizedBox(height: AppDimensions.spaceXs),
-                SelectableText(
-                  posting.subject.isEmpty ? '—' : posting.subject,
-                  style: theme.textTheme.titleSmall,
-                ),
-                const SizedBox(height: AppDimensions.spaceMd),
-                const SectionLabel('Generated Email', icon: Icons.drafts_outlined),
-                const SizedBox(height: AppDimensions.spaceXs),
-                _EmailBodyBox(html: posting.emailBody),
+                _MissingDetailsWarning(controller: controller),
+                _DraftEditor(controller: controller),
               ],
             ),
           ),
@@ -392,25 +385,159 @@ class _AttachmentsRow extends StatelessWidget {
   }
 }
 
-class _EmailBodyBox extends StatelessWidget {
-  const _EmailBodyBox({required this.html});
+/// Warns when the post asks for candidate details the user has not saved.
+///
+/// Those details are silently absent from the generated subject and body — the
+/// AI omits rather than invents them — so without this banner the user would
+/// send an application that quietly ignores what the recruiter asked for.
+class _MissingDetailsWarning extends StatelessWidget {
+  const _MissingDetailsWarning({required this.controller});
 
-  final String html;
+  final HomeController controller;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spaceMd),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-      ),
-      child: SelectableText(
-        html.isEmpty ? '—' : html,
-        style: theme.textTheme.bodyMedium,
-      ),
+    return Obx(() {
+      final List<CandidateDetail> missing = controller.missingRequestedDetails;
+      if (missing.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      final String names = missing
+          .map((CandidateDetail detail) => detail.label)
+          .join(', ');
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: AppDimensions.spaceMd),
+        padding: const EdgeInsets.all(AppDimensions.spaceMd),
+        decoration: BoxDecoration(
+          color: AppColors.warning.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 18,
+                  color: AppColors.warning,
+                ),
+                const SizedBox(width: AppDimensions.spaceXs),
+                Expanded(
+                  child: Text(
+                    'This post asks for $names',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppDimensions.spaceXs),
+            Text(
+              missing.length == 1
+                  ? 'You have not saved it, so it was left out of the email '
+                      'rather than guessed. Add it in Settings and regenerate, '
+                      'or type it into the draft below.'
+                  : 'You have not saved them, so they were left out of the '
+                      'email rather than guessed. Add them in Settings and '
+                      'regenerate, or type them into the draft below.',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppDimensions.spaceXs),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: controller.openSettings,
+                icon: const Icon(Icons.settings_outlined, size: 16),
+                label: const Text('Open Settings'),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+/// Editable subject + body. Bound directly to the controller's text
+/// controllers, so whatever is on screen here is exactly what gets sent.
+class _DraftEditor extends StatelessWidget {
+  const _DraftEditor({required this.controller});
+
+  final HomeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SectionLabel('Email Subject', icon: Icons.subject_rounded),
+        const SizedBox(height: AppDimensions.spaceXs),
+        TextField(
+          controller: controller.subjectController,
+          style: theme.textTheme.titleSmall,
+          decoration: const InputDecoration(
+            hintText: 'Subject line',
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spaceMd),
+        Row(
+          children: <Widget>[
+            const SectionLabel('Email Body', icon: Icons.drafts_outlined),
+            const Spacer(),
+            Obx(
+              () => controller.isEdited.value
+                  ? TextButton.icon(
+                      onPressed: controller.restoreAiDraft,
+                      icon: const Icon(Icons.undo_rounded, size: 16),
+                      label: const Text('Restore AI version'),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            TextButton.icon(
+              onPressed: () => unawaited(controller.analyze()),
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('Regenerate'),
+              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppDimensions.spaceXs),
+        TextField(
+          controller: controller.bodyController,
+          maxLines: null,
+          minLines: 8,
+          style: theme.textTheme.bodyMedium,
+          decoration: InputDecoration(
+            hintText: 'Email body (HTML)',
+            alignLabelWithHint: true,
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spaceXxs),
+        Text(
+          'Edit freely — this exact text is what gets sent. HTML tags such as '
+          '<p> and <br> control the formatting; your signature is already '
+          'included at the end.',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

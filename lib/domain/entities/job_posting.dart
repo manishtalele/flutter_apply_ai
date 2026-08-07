@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_apply_ai/domain/entities/enums/candidate_detail.dart';
 
 /// The structured result of AI-analyzing a raw, pasted job description.
 ///
@@ -20,6 +21,7 @@ class JobPosting extends Equatable {
     required this.shouldApply,
     this.matchSummary = '',
     this.phone = '',
+    this.requestedDetails = const <CandidateDetail>[],
   });
 
   final String company;
@@ -42,6 +44,12 @@ class JobPosting extends Equatable {
 
   /// Short natural-language justification for [matchScore] / [shouldApply].
   final String matchSummary;
+
+  /// The candidate details this post explicitly asks the applicant to state,
+  /// whether or not the app had a value for them. Reported by the AI so the UI
+  /// can warn about the ones the user has not filled in — those are silently
+  /// left out of the subject and body rather than guessed.
+  final List<CandidateDetail> requestedDetails;
 
   /// Whether a recipient email address was extracted.
   bool get hasRecipient => email.trim().isNotEmpty;
@@ -66,6 +74,7 @@ class JobPosting extends Equatable {
     bool? shouldApply,
     String? matchSummary,
     String? phone,
+    List<CandidateDetail>? requestedDetails,
   }) {
     return JobPosting(
       company: company ?? this.company,
@@ -80,6 +89,7 @@ class JobPosting extends Equatable {
       shouldApply: shouldApply ?? this.shouldApply,
       matchSummary: matchSummary ?? this.matchSummary,
       phone: phone ?? this.phone,
+      requestedDetails: requestedDetails ?? this.requestedDetails,
     );
   }
 
@@ -97,5 +107,6 @@ class JobPosting extends Equatable {
         shouldApply,
         matchSummary,
         phone,
+        requestedDetails,
       ];
 }
